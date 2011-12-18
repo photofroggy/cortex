@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "lib/utils.h"
+#include "lib/damn.h"
 
 int main(int argv, char** argc) {
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -28,11 +29,17 @@ int main(int argv, char** argc) {
 
     char *msg = "dAmnClient 0.3\nagent=incluye\n";
 
-    printf("Wrote %d bytes.\n", (int)(write(sock, msg, strlen(msg) + 1)));
+    write(sock, msg, strlen(msg)+1);
 
     char *resp = read_all(sock, 44);
 
-    printf("%s", resp);
+    packet* pkt;
+
+    if((pkt = parse(resp)) == NULL) {
+        printf("Couldn't parse response :(");
+    } else {
+        inspect(pkt);
+    }
 
     free(resp);
 
