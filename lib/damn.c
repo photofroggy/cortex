@@ -1,9 +1,9 @@
 #include "damn.h"
 
 packet* parse(char* pkt) {
-    packet *pack;
+    packet *pack = malloc(sizeof(packet));
 
-    sscanf(pkt, "%s %*s", pack->command);
+    sscanf(pkt, "%s %s", pack->command, pack->param);
     return pack;
 }
 
