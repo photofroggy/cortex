@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
+#include <unistd.h>
 #include "utils.h"
 
 int main(int argv, char** argc) {
@@ -27,7 +28,7 @@ int main(int argv, char** argc) {
 
     char *msg = "dAmnClient 0.3\nagent=incluye\n";
 
-    printf("Wrote %d bytes.\n", write(sock, msg, strlen(msg) + 1));
+    printf("Wrote %d bytes.\n", (int)(write(sock, msg, strlen(msg) + 1)));
 
     char *resp = read_all(sock, 44);
 

@@ -1,13 +1,16 @@
+CC=gcc
+CFLAGS=-c -Wall
+
 all: cortex
 
 cortex: main.o utils.o
-	gcc main.o utils.o -o cortex
+	$(CC) main.o utils.o -o cortex
 
 main.o: main.c
-	gcc -c main.c
+	$(CC) $(CFLAGS) main.c
 
 utils.o: utils.c
-	gcc -c utils.c
+	$(CC) $(CFLAGS) utils.c
 
 clean:
 	rm cortex *.o
