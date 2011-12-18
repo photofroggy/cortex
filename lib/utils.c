@@ -5,6 +5,7 @@ char* read_all(int socket, int length) {
 
     if(recv(socket, buf, length, 0) == -1) {
         fprintf(stderr, "recv() failed: %s", strerror(errno));
+        free(buf);
         return NULL;
     } else {
         return buf;

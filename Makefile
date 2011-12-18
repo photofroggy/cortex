@@ -3,14 +3,14 @@ CFLAGS=-c -Wall
 
 all: cortex
 
-cortex: main.o utils.o
-	$(CC) main.o utils.o -o cortex
+cortex: cortex.o lib/utils.o
+	$(CC) cortex.o lib/utils.o -o cortex
 
-main.o: main.c
-	$(CC) $(CFLAGS) main.c
+cortex.o: cortex.c
+	$(CC) $(CFLAGS) cortex.c
 
-utils.o: utils.c
-	$(CC) $(CFLAGS) utils.c
+utils.o: lib/utils.c
+	$(CC) $(CFLAGS) lib/utils.c
 
 clean:
-	rm cortex *.o
+	rm cortex *.o lib/*.o

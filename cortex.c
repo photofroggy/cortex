@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
-#include "utils.h"
+#include "lib/utils.h"
 
 int main(int argv, char** argc) {
     setvbuf(stdout, NULL, _IONBF, 0);
