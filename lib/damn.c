@@ -3,7 +3,7 @@
 packet* parse(char* pkt) {
     packet *pack = malloc(sizeof(packet));
 
-    sscanf(pkt, "%s %s", pack->command, pack->param);
+    sscanf(pkt, "%s%s", pack->command, pack->param);
     return pack;
 }
 
