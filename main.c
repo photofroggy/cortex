@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
-#include "utils.c"
+#include "utils.h"
 
 int main(int argv, char** argc) {
     setvbuf(stdout, NULL, _IONBF, 0);
