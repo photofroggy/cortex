@@ -118,6 +118,32 @@ static void inspect_hash(const char *key, const char *value, const void *obj) {
     printf("%s = %s\n", key, value);
 }
 
+char* packet_event_name(packet * pack) {
+        char * name = pack->command;
+        
+        if(strcmp(name, "recv")) {
+            return name;
+        }
+        
+        pack->subpacket = parse(pack->body);
+            
+        if(pack->subpacket == NULL) {
+            return name;
+        }
+        
+        strcat(name, "_");
+        strcat(name, pack->subpacket->command);
+            
+        if(strcmp(pack->subpacket->command, "admin")) {
+            return name;
+        }
+        
+        strcat(name, "_");
+        strcat(name, pack->subpacket->param);
+        
+        return name;
+}
+
 void inspect(packet* pk) {
     /* Deprecated I guess. Needs a rewrite.
     printf("command = %s\nparam = %s\n", pk->command, pk->param);

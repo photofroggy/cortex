@@ -34,6 +34,8 @@ packet_arg* parse_arg(char* line, int sep);
 void packet_arg_add(packet * pack, packet_arg * arg);
 char* packet_arg_find(packet * pack, char * key);
 
+char* packet_event_name(packet * pack);
+
 void inspect(packet* pkt);
 
 #ifdef __cplusplus

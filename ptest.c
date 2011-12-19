@@ -10,7 +10,7 @@ int main(int argv, char** argc) {
     pkt->subpacket = malloc(sizeof(packet));
     pkt->subpacket = parse(pkt->body);
     
-    printf("event: %s_%s\nargs:", pkt->command, pkt->subpacket->command);
+    printf("event: %s\nargs:", packet_event_name(pkt), pkt->subpacket->command);
     
     packet_arg * arg = pkt->subpacket->arg;
     
