@@ -62,7 +62,9 @@ packet* parse(char* pkt) {
         item++;
         
     } while(pch != 0);
-
+    
+    free(pch);
+    
     return pack;
 }
 
