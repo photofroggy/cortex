@@ -1,14 +1,24 @@
-#include <stdio.h>
-#include <string.h>
+#ifndef _DAMN_H_
+#define _DAMN_H_
 
-typedef struct _packet {
-    char command[13];
-    char param[64];
-    char body[8192];
-    char **args;
-    void *subpacket;
-} packet;
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "strmap.h"
+
+typedef struct _packet packet;
 
 packet* parse(char* pkt);
 
 void inspect(packet* pkt);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

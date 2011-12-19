@@ -31,7 +31,7 @@ int main(int argv, char** argc) {
 
     write(sock, msg, strlen(msg)+1);
 
-    char *resp = read_all(sock, 44);
+    char *resp = read_all(sock, 42);
 
     packet* pkt;
 
