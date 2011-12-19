@@ -62,13 +62,15 @@ packet* parse(char* pkt) {
         item++;
         
     } while(pch != 0);
-
+    
     return pack;
 }
 
 packet_arg* parse_arg(char * line, int sep) {
     packet_arg *arg = malloc(sizeof(packet_arg));
     char * pch = strchr(line, sep);
+    
+    arg->next = NULL;
     
     if(pch == 0) {
         return NULL;
@@ -78,6 +80,7 @@ packet_arg* parse_arg(char * line, int sep) {
     strcpy(arg->value, pch + 1);
     
     arg->key[pch - line] = '\0';
+    //arg->value[strlen(pch + 1)] = '\0';
     
     return arg;
 }

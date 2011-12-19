@@ -4,21 +4,25 @@
 
 int main(int argv, char** argc) {
     
-    printf("Yo!\n");
-    
     packet * pkt = malloc(sizeof(packet));
-    pkt = parse("hello world\nfoo=bar\nlol=wot\n\nsomething else here\0");
+    pkt = parse("recv chat:Botdom\n\nmsg main\nfrom=photofroggy\n\nsomething else here\0");
     
-    printf("cmd: %s\nparam: %s\nargs:", pkt->command, pkt->param);
+    pkt->subpacket = malloc(sizeof(packet));
+    pkt->subpacket = parse(pkt->body);
     
-    packet_arg * arg = pkt->arg;
+    printf("event: %s_%s\nargs:", pkt->command, pkt->subpacket->command);
     
-    while(arg != NULL) {
+    packet_arg * arg = pkt->subpacket->arg;
+    
+    while(1) {
         printf("\n-- %s = %s", arg->key, arg->value);
         arg = arg->next;
+        if(arg == NULL) {
+            break;
+        }
     }
     
-    printf("\nbody: %s\n", pkt->body);
+    printf("\nmessage: %s\n", pkt->subpacket->body);
     
     // Should succeed.
     printf("\n---------------\nSearching for arg 'foo'...\n");
