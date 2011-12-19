@@ -11,7 +11,7 @@ int main(int argv, char** argc) {
     
     printf("cmd: %s\nparam: %s\nargs:", pkt->command, pkt->param);
     
-    packet_arg * arg = pkt->parg;
+    packet_arg * arg = pkt->arg;
     
     while(arg != NULL) {
         printf("\n-- %s = %s", arg->key, arg->value);
