@@ -11,9 +11,29 @@ extern "C"
 #include <string.h>
 #include "strmap.h"
 
-typedef struct _packet packet;
+typedef struct _packet_arg {
+    char key[30];
+    char value[30];
+    struct _packet_arg * next;
+} packet_arg;
+
+typedef struct _packet {
+    char command[11];
+    char param[64];
+    char body[8192];
+    StrMap *args;
+    struct _packet_arg * parg;
+    void *subpacket;
+} packet;
+
+/*typedef _packet_arg packet_arg;
+typedef _packet packet;*/
 
 packet* parse(char* pkt);
+packet_arg* parse_arg(char* line, int sep);
+
+void packet_arg_add(packet * pack, packet_arg * arg);
+char* packet_arg_find(packet * pack, char * key);
 
 void inspect(packet* pkt);
 
