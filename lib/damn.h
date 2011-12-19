@@ -23,7 +23,7 @@ typedef struct _packet {
     char body[8192];
     StrMap *args;
     struct _packet_arg * parg;
-    void *subpacket;
+    struct _packet *subpacket;
 } packet;
 
 /*typedef _packet_arg packet_arg;
