@@ -97,12 +97,12 @@ packet_arg* parse_arg(char * line, int sep) {
 }
 
 void packet_arg_add(packet * pack, packet_arg * arg) {
-    if(pack->parg == NULL) {
-        pack->parg = arg;
+    if(pack->arg == NULL) {
+        pack->arg = arg;
         return;
     }
     packet_arg * targ;
-    targ = pack->parg;
+    targ = pack->arg;
     
     while(targ->next != NULL) {
         targ = targ->next;
@@ -113,7 +113,7 @@ void packet_arg_add(packet * pack, packet_arg * arg) {
 
 char* packet_arg_find(packet * pack, char * key) {
     packet_arg * arg;
-    arg = pack->parg;
+    arg = pack->arg;
     
     while(arg != NULL) {
         if(!strcmp(arg->key, key))
@@ -130,6 +130,8 @@ static void inspect_hash(const char *key, const char *value, const void *obj) {
 }
 
 void inspect(packet* pk) {
+    /* Deprecated I guess. Needs a rewrite.
     printf("command = %s\nparam = %s\n", pk->command, pk->param);
     sm_enum(pk->args, inspect_hash, NULL);
+    */
 }

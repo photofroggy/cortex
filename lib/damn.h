@@ -21,8 +21,7 @@ typedef struct _packet {
     char command[11];
     char param[64];
     char body[8192];
-    StrMap *args;
-    struct _packet_arg * parg;
+    struct _packet_arg * arg;
     struct _packet *subpacket;
 } packet;
 
