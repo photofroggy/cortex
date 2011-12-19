@@ -1,14 +1,24 @@
 #include <stdio.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <sys/types.h>
+#ifdef WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #pragma comment (lib, "Ws2_32.lib")
+#else
+    #include <netinet/in.h>
+    #include <netdb.h>
+    #include <sys/socket.h>
+    #include <sys/types.h>
+#endif
 #include <string.h>
 #include <unistd.h>
 #include "lib/utils.h"
 #include "lib/damn.h"
 
 int main(int argv, char** argc) {
+
+    WSADATA wsaData;
+    int iResult = WSAStartup( MAKEWORD(2,2), &wsaData );
+    
     setvbuf(stdout, NULL, _IONBF, 0);
 
     struct addrinfo addr, *res;
