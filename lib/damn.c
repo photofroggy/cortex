@@ -52,9 +52,6 @@ packet* parse(char* pkt) {
     
     // Process each line under the command and param in the header.
     while(pch != 0) {
-        // Empty pch and line.
-        pch = "";
-        line[0] = '\0';
         // Find the end of the line.
         pch = strchr(head, '\n');
         
@@ -63,7 +60,6 @@ packet* parse(char* pkt) {
             strncpy(line, head, pch - head);
             // Make sure the last character is nul.
             line[pch - head] = '\0';
-            head[0] = '\0';
             // Copy the rest of the header into `head`.
             strcpy(head, pch + 1);
         } else {
