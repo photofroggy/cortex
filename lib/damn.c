@@ -6,6 +6,7 @@ packet* parse(char* pkt) {
     char * pch = strstr(pkt, "\n\n");
     char head[8092];
     char line[1000];
+    int item = 0;
     packet_arg * targ;
     
     /* If there is a packet body, we may as well handle that first, as this
@@ -20,38 +21,10 @@ packet* parse(char* pkt) {
         strcpy(pack->body, pch+2);
     }
     
-    // Find where the first linebreak is, so we can get the command and param.
-    pch = strchr(head, '\n');
-    
-    if(pch == 0) {
-        // First line must always be the command and/or param.
-        targ = parse_arg(head, ' ');  
-        
-        if(targ == NULL) {
-            strcpy(pack->command, head);
-        } else {
-            strcpy(pack->command, targ->key);
-            strcpy(pack->param, targ->value);
-        }
-            
-        return pack;
-    } else {
-        strncpy(line, head, pch - head);
-        targ = parse_arg(line, ' ');
-        
-        if(targ == NULL) {
-            strcpy(pack->command, head);
-        } else {
-            strcpy(pack->command, targ->key);
-            strcpy(pack->param, targ->value);
-        
-        }
-        strcpy(head, pch + 1);
-    }
-    
     
     // Process each line under the command and param in the header.
-    while(pch != 0) {
+    // Use a do...while to make sure single-line headers are processed.
+    do {
         // Find the end of the line.
         pch = strchr(head, '\n');
         
@@ -67,15 +40,28 @@ packet* parse(char* pkt) {
             strcpy(line, head);
         }
         
-        // Parse `line` as an arg.
-        targ = parse_arg(line, '=');
-        
-        if(targ != NULL) {
-            // Add the arg if parsed successfully.
-            packet_arg_add(pack, targ);
+        // Parse `line` as an arg or as command and/or param.
+        if(item == 0) {
+            targ = parse_arg(line, ' ');
+        } else {
+            targ = parse_arg(line, '=');
         }
         
-    }
+        if(targ != NULL) {
+            if(item == 0) {
+                strcpy(pack->command, targ->key);
+                strcpy(pack->param, targ->value);
+            } else {
+                // Add the arg if parsed successfully.
+                packet_arg_add(pack, targ);
+            }
+        } else if(item == 0) {
+            strcpy(pack->command, line);
+        }
+        
+        item++;
+        
+    } while(pch != 0);
 
     return pack;
 }
