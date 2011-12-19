@@ -111,13 +111,13 @@ char* packet_arg_find(packet * pack, char * key) {
     return NULL;
 }
 
-static void inspect_hash(const char *key, const char *value, const void *obj) {
+/* static void inspect_hash(const char *key, const char *value, const void *obj) {
     printf("%s = %s\n", key, value);
 }
 
 void inspect(packet* pk) {
-    /* Deprecated I guess. Needs a rewrite.
+     Deprecated I guess. Needs a rewrite.
     printf("command = %s\nparam = %s\n", pk->command, pk->param);
     sm_enum(pk->args, inspect_hash, NULL);
-    */
-}
+    
+} */

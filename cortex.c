@@ -38,7 +38,7 @@ int main(int argv, char** argc) {
     if((pkt = parse(resp)) == NULL) {
         printf("Couldn't parse response :(");
     } else {
-        inspect(pkt);
+        printf("command = %s\n", pkt->command);
     }
 
     free(resp);
