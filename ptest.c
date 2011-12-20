@@ -2,6 +2,8 @@
 #include <string.h>
 #include "lib/damn.h"
 
+static void precv_msg(packet * pack, const void *obj);
+
 int main(int argv, char** argc) {
     
     packet * pkt = malloc(sizeof(packet));
@@ -10,46 +12,28 @@ int main(int argv, char** argc) {
     pkt->subpacket = malloc(sizeof(packet));
     pkt->subpacket = parse(pkt->body);
     
-    packet_event * pevent = ptoevent(pkt);
+    ptoevent(pkt);
     
-    printf("event: %s\nargs:", pevent->name, pkt->subpacket->command);
+    printf("event: %s\n", pkt->event);
     
-    packet_arg * arg = pkt->subpacket->arg;
+    // Testing out the callback mapping
+    packet_cbmap * map = new_packet_cbmap("event");
     
-    while(1) {
-        printf("\n-- %s = %s", arg->key, arg->value);
-        arg = arg->next;
-        if(arg == NULL) {
-            break;
-        }
-    }
+    //cbmap_add_callback(map, precv_msg);
+    packet_callback_add(map, "recv_msg", precv_msg);
     
-    printf("\nmessage: %s\n", pkt->subpacket->body);
-    
-    // Should succeed.
-    printf("\n---------------\nSearching for arg 'foo'...\n");
-    
-    char * pargv;
-    pargv = packet_arg_find(pkt, "foo");
-    
-    if(pargv == NULL) {
-        printf("foo not found!");
-    } else {
-        printf("foo found! Foo = %s", pargv);
-    }
-    
-    // Should fail.
-    printf("\n---------------\nSearching for arg 'baz'...\n");
-    
-    pargv = packet_arg_find(pkt, "baz");
-    
-    if(pargv == NULL) {
-        printf("baz not found!");
-    } else {
-        printf("baz found! Baz = %s", pargv);
-    }
+    fire_pcallback(map, pkt, NULL);
     
     return 0;
+}
+
+static void precv_msg(packet * pack, const void *obj) {
+    printf("---\npacket callback `precv_msg` called for %s\n", pack->event);
+    printf("[#%s] <%s> %s\n----\n",
+        pack->param + 5,
+        packet_arg_find(pack->subpacket, "from"),
+        pack->subpacket->body
+    );
 }
 
 // EOF

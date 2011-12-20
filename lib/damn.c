@@ -144,14 +144,131 @@ char* packet_event_name(packet * pack) {
         return name;
 }
 
-packet_event* ptoevent(packet * pack) {
-    char * name = packet_event_name(pack);
-    packet_event * pevent = malloc(sizeof(packet_event));
+void ptoevent(packet * pack) {
+    strcpy(pack->event, packet_event_name(pack));
+}
+
+packet_cbmap* new_packet_cbmap(char * event) {
+    packet_cbmap * map = malloc(sizeof(packet_cbmap));
+    strcpy(map->event, event);
+    map->event[strlen(event)] = '\0';
+    map->callback = NULL;
+    map->next = NULL;
+    return map;
+}
+
+packet_callback* new_packet_callback(dpcallback method) {
+    packet_callback * cb = malloc(sizeof(packet_callback));
+    cb->method = method;
+    cb->next = NULL;
+    return cb;
+}
+
+packet_callback* packet_callback_add(packet_cbmap * callbacks, char * event, dpcallback method) {
+    packet_cbmap * chain;
+    packet_callback * hop;
     
-    strcpy(pevent->name, name);
-    pevent->pkt = pack;
+    chain = get_packet_callbacks(callbacks, event);
     
-    return pevent;
+    if(chain->callback == NULL) {
+        chain->callback = new_packet_callback(method);
+        
+        return chain->callback;
+    }
+    
+    hop = chain->callback;
+    while(1) {
+        if(hop->next == NULL)
+            break;
+        hop = hop->next;
+    }
+    
+    hop->next = new_packet_callback(method);
+    return hop->next;
+}
+
+packet_cbmap* get_packet_callbacks(packet_cbmap * callbacks, char * event) {
+    packet_cbmap * tmap = callbacks;
+    int count = 0;
+    
+    while(1) {
+        count++;
+        if(tmap->event[0] == '\0') {
+            strcpy(tmap->event, event);
+            tmap->event[strlen(event)] = '\0';
+            break;
+        }
+        
+        if(!strcmp(tmap->event, event))
+            return tmap;
+        
+        if(tmap->next == NULL)
+            break;
+        
+        tmap = tmap->next;
+    };
+    
+    if(!strcmp(tmap->event, event)) {
+        tmap->next = new_packet_cbmap(event);
+        tmap = tmap->next;
+        strcpy(tmap->event, event);
+        tmap->event[strlen(event)] = '\0';
+    }
+    
+    return tmap;
+}
+
+packet_callback* cbmap_add_callback(packet_cbmap * callbacks, dpcallback method) {
+    packet_callback * cb;
+    
+    if(callbacks->callback == NULL) {
+        callbacks->callback = new_packet_callback(method);
+        return callbacks->callback;
+    }
+    
+    cb = callbacks->callback;
+    
+    while(1) {
+        if(cb->next == NULL) {
+            cb->next = new_packet_callback(method);
+            return cb->next;
+        }
+        cb = cb->next;
+    }
+    
+    return NULL;
+}
+
+void fire_pcallback(packet_cbmap * callbacks, packet * pkt, const void *obj) {
+    packet_cbmap * map = get_packet_callbacks(callbacks, pkt->event);
+    
+    if(map->callback == NULL)
+        return;
+    
+    packet_callback * callback = map->callback;
+    
+    while(1) {
+        
+        if(callback == NULL)
+            break;
+        
+        callback->method(pkt, obj);
+        callback = callback->next;
+    }
+}
+
+int packet_map_count(packet_cbmap * callbacks) {
+    packet_cbmap * map = callbacks;
+    int count = 0;
+    
+    while(1) {
+        if(map == NULL)
+            return count;
+        
+        count++;
+        map = map->next;
+        
+    }
 }
 
 void inspect(packet* pk) {
