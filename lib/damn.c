@@ -144,6 +144,16 @@ char* packet_event_name(packet * pack) {
         return name;
 }
 
+packet_event* ptoevent(packet * pack) {
+    char * name = packet_event_name(pack);
+    packet_event * pevent = malloc(sizeof(packet_event));
+    
+    strcpy(pevent->name, name);
+    pevent->pkt = pack;
+    
+    return pevent;
+}
+
 void inspect(packet* pk) {
     /* Deprecated I guess. Needs a rewrite.
     printf("command = %s\nparam = %s\n", pk->command, pk->param);
