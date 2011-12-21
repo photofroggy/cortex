@@ -90,7 +90,7 @@ void packet_arg_add(packet * pack, packet_arg * arg) {
         pack->arg = arg;
         return;
     }
-    packet_arg * targ;
+    packet_arg * targ = malloc(sizeof(packet_arg));
     targ = pack->arg;
     
     while(targ->next != NULL) {
@@ -239,21 +239,25 @@ packet_callback* cbmap_add_callback(packet_cbmap * callbacks, dpcallback method)
     return NULL;
 }
 
-void fire_pcallback(packet_cbmap * callbacks, packet * pkt, const void *obj) {
+void fire_pcallback(packet_cbmap * callbacks, packet * pkt, void *obj) {
     packet_cbmap * map = get_packet_callbacks(callbacks, pkt->event);
     
     if(map->callback == NULL)
         return;
     
-    packet_callback * callback = map->callback;
+    packet_callback *callback = map->callback;
+    
+    if(callback == NULL)
+        return;
     
     while(1) {
         
-        if(callback == NULL)
-            break;
-        
         callback->method(pkt, obj);
-        callback = callback->next;
+        
+        if(callback->next == NULL)
+            break;
+            
+        *callback = (packet_callback)*callback->next;
     }
 }
 

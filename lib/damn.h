@@ -26,7 +26,7 @@ typedef struct _packet {
     struct _packet *subpacket;
 } packet;
 
-typedef void(*dpcallback) (packet * pkt, const void *obj);
+typedef void(*dpcallback) (packet * pkt, void *obj);
 
 typedef struct _packet_callback {
     dpcallback method;
@@ -57,7 +57,7 @@ packet_cbmap* get_packet_callbacks(packet_cbmap * callbacks, char * event);
 packet_cbmap* new_packet_cbmap(char * event);
 packet_callback* cbmap_add_callback(packet_cbmap * callbacks, dpcallback method);
 packet_callback* new_packet_callback(dpcallback method);
-void fire_pcallback(packet_cbmap * callbacks, packet * pkt, const void *obj);
+void fire_pcallback(packet_cbmap * callbacks, packet * pkt, void *obj);
 int packet_map_count(packet_cbmap * callbacks);
 
 void inspect(packet* pkt);
