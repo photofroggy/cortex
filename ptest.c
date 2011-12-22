@@ -27,7 +27,7 @@ int main(int argv, char** argc) {
     fire_pcallback(map, pkt, NULL);
     
     packet *pkt2;
-    pkt2 = parse("foo bar\nlol=wot\n\nsomething about twats\0");
+    pkt2 = parse("foo bar\nlol=wot\nbar=baz\n\nsomething about twats\0");
     ptoevent(pkt2);
     
     fire_pcallback(map, pkt2, pkt2);
@@ -50,7 +50,9 @@ static void foo(packet * pkt, void *obj) {
         return;
     }
     
-    printf("event: %s\n", ((packet*)obj)->event);
+    char * b = packet_arg_find((packet*) obj, "bar");
+    
+    printf("event: %s\nb: %s\n", ((packet*)obj)->event, b);
 }
 
 // EOF
