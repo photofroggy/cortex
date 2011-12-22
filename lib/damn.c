@@ -14,13 +14,15 @@ packet* parse(char* pkt) {
      * breaks, as in strstr above, and then copy the header into a separate
      * string.
      */
-    if(pch == 0) {
+    if(pch == NULL) {
         strcpy(head, pkt);
+        head[strlen(pkt)] = '\0';
     } else {
         strncpy(head, pkt, pch - pkt);
-        strcpy(pack->body, pch+2);
+        strcpy(pack->body, pch + 2);
+        head[pch - pkt] = '\0';
+        pack->body[pch - pkt + 2] = '\0';
     }
-    
     
     // Process each line under the command and param in the header.
     // Use a do...while to make sure single-line headers are processed.
@@ -28,7 +30,7 @@ packet* parse(char* pkt) {
         // Find the end of the line.
         pch = strchr(head, '\n');
         
-        if(pch != 0) {
+        if(pch != NULL) {
             // Copy the first line to `line`.
             strncpy(line, head, pch - head);
             // Make sure the last character is nul.
@@ -60,8 +62,9 @@ packet* parse(char* pkt) {
         }
         
         item++;
+        line[0] = '\0';
         
-    } while(pch != 0);
+    } while(pch != NULL);
     
     return pack;
 }
@@ -80,7 +83,7 @@ packet_arg* parse_arg(char * line, int sep) {
     strcpy(arg->value, pch + 1);
     
     arg->key[pch - line] = '\0';
-    //arg->value[strlen(pch + 1)] = '\0';
+    arg->value[strlen(pch + 1)] = '\0';
     
     return arg;
 }
@@ -90,8 +93,8 @@ void packet_arg_add(packet * pack, packet_arg * arg) {
         pack->arg = arg;
         return;
     }
-    packet_arg * targ;
-    targ = pack->arg;
+    
+    packet_arg * targ = pack->arg;
     
     while(targ->next != NULL) {
         targ = targ->next;
@@ -116,6 +119,164 @@ char* packet_arg_find(packet * pack, char * key) {
 
 /* static void inspect_hash(const char *key, const char *value, const void *obj) {
     printf("%s = %s\n", key, value);
+}
+
+char* packet_event_name(packet * pack) {
+        char * name = pack->command;
+        
+        if(strcmp(name, "recv")) {
+            return name;
+        }
+        
+        if(pack->subpacket == NULL)
+            pack->subpacket = parse(pack->body);
+            
+        if(pack->subpacket == NULL) {
+            return name;
+        }
+        
+        strcat(name, "_");
+        strcat(name, pack->subpacket->command);
+            
+        if(strcmp(pack->subpacket->command, "admin")) {
+            return name;
+        }
+        
+        strcat(name, "_");
+        strcat(name, pack->subpacket->param);
+        
+        return name;
+}
+
+void ptoevent(packet * pack) {
+    strcpy(pack->event, packet_event_name(pack));
+}
+
+packet_cbmap* new_packet_cbmap(char * event) {
+    packet_cbmap * map = malloc(sizeof(packet_cbmap));
+    strcpy(map->event, event);
+    map->event[strlen(event)] = '\0';
+    map->callback = NULL;
+    map->next = NULL;
+    return map;
+}
+
+packet_callback* new_packet_callback(dpcallback method) {
+    packet_callback * cb = malloc(sizeof(packet_callback));
+    cb->method = method;
+    cb->next = NULL;
+    return cb;
+}
+
+packet_callback* packet_callback_add(packet_cbmap * callbacks, char * event, dpcallback method) {
+    packet_cbmap * chain;
+    packet_callback * hop;
+    
+    chain = get_packet_callbacks(callbacks, event);
+    
+    if(chain->callback == NULL) {
+        chain->callback = new_packet_callback(method);
+        
+        return chain->callback;
+    }
+    
+    hop = chain->callback;
+    while(1) {
+        if(hop->next == NULL)
+            break;
+        hop = hop->next;
+    }
+    
+    hop->next = new_packet_callback(method);
+    return hop->next;
+}
+
+packet_cbmap* get_packet_callbacks(packet_cbmap * callbacks, char * event) {
+    packet_cbmap * tmap = callbacks;
+    int count = 0;
+    
+    while(1) {
+        count++;
+        if(tmap->event[0] == '\0') {
+            strcpy(tmap->event, event);
+            tmap->event[strlen(event)] = '\0';
+            break;
+        }
+        
+        if(!strcmp(tmap->event, event))
+            return tmap;
+        
+        if(tmap->next == NULL)
+            break;
+        
+        tmap = tmap->next;
+    };
+    
+    if(!strcmp(tmap->event, event)) {
+        tmap->next = new_packet_cbmap(event);
+        tmap = tmap->next;
+        strcpy(tmap->event, event);
+        tmap->event[strlen(event)] = '\0';
+    }
+    
+    return tmap;
+}
+
+packet_callback* cbmap_add_callback(packet_cbmap * callbacks, dpcallback method) {
+    packet_callback * cb;
+    
+    if(callbacks->callback == NULL) {
+        callbacks->callback = new_packet_callback(method);
+        return callbacks->callback;
+    }
+    
+    cb = callbacks->callback;
+    
+    while(1) {
+        if(cb->next == NULL) {
+            cb->next = new_packet_callback(method);
+            return cb->next;
+        }
+        cb = cb->next;
+    }
+    
+    return NULL;
+}
+
+void fire_pcallback(packet_cbmap * callbacks, packet * pkt, void *obj) {
+    packet_cbmap * map = get_packet_callbacks(callbacks, pkt->event);
+    
+    if(map->callback == NULL)
+        return;
+    
+    packet_callback *callback = map->callback;
+    
+    if(callback == NULL)
+        return;
+    
+    while(1) {
+        
+        callback->method(pkt, obj);
+        
+        if(callback->next == NULL)
+            break;
+            
+        *callback = (packet_callback)*callback->next;
+    }
+}
+
+int packet_map_count(packet_cbmap * callbacks) {
+    packet_cbmap * map = callbacks;
+    int count = 0;
+    
+    while(1) {
+        if(map == NULL)
+            return count;
+        
+        count++;
+        map = map->next;
+        
+    }
 }
 
 void inspect(packet* pk) {
