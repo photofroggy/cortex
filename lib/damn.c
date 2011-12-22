@@ -14,15 +14,13 @@ packet* parse(char* pkt) {
      * breaks, as in strstr above, and then copy the header into a separate
      * string.
      */
-    if(pch == NULL) {
+    if(pch == 0) {
         strcpy(head, pkt);
-        head[strlen(pkt)] = '\0';
     } else {
         strncpy(head, pkt, pch - pkt);
-        strcpy(pack->body, pch + 2);
-        head[pch - pkt] = '\0';
-        pack->body[pch - pkt + 2] = '\0';
+        strcpy(pack->body, pch+2);
     }
+    
     
     // Process each line under the command and param in the header.
     // Use a do...while to make sure single-line headers are processed.
@@ -30,7 +28,7 @@ packet* parse(char* pkt) {
         // Find the end of the line.
         pch = strchr(head, '\n');
         
-        if(pch != NULL) {
+        if(pch != 0) {
             // Copy the first line to `line`.
             strncpy(line, head, pch - head);
             // Make sure the last character is nul.
@@ -62,9 +60,8 @@ packet* parse(char* pkt) {
         }
         
         item++;
-        line[0] = '\0';
         
-    } while(pch != NULL);
+    } while(pch != 0);
     
     return pack;
 }
@@ -83,7 +80,7 @@ packet_arg* parse_arg(char * line, int sep) {
     strcpy(arg->value, pch + 1);
     
     arg->key[pch - line] = '\0';
-    arg->value[strlen(pch + 1)] = '\0';
+    //arg->value[strlen(pch + 1)] = '\0';
     
     return arg;
 }
@@ -93,8 +90,8 @@ void packet_arg_add(packet * pack, packet_arg * arg) {
         pack->arg = arg;
         return;
     }
-    
-    packet_arg * targ = pack->arg;
+    packet_arg * targ = malloc(sizeof(packet_arg));
+    targ = pack->arg;
     
     while(targ->next != NULL) {
         targ = targ->next;
@@ -128,8 +125,7 @@ char* packet_event_name(packet * pack) {
             return name;
         }
         
-        if(pack->subpacket == NULL)
-            pack->subpacket = parse(pack->body);
+        pack->subpacket = parse(pack->body);
             
         if(pack->subpacket == NULL) {
             return name;
